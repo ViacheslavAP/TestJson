@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.testjson.databinding.ActivityMainBinding
 import com.example.testjson.helper.Constants.BASE_URL
+import com.example.testjson.retrofit.AuthRequest
 import com.example.testjson.retrofit.MainApi
+import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,13 +42,24 @@ class MainActivity : AppCompatActivity() {
             .build()
 
         //создаем инстанцию интерфейса
-        val productApi = retrofit.create(MainApi::class.java)
+        val mainApi = retrofit.create(MainApi::class.java)
 
         binding.button.setOnClickListener {
             CoroutineScope(Dispatchers.IO).launch {
-                val product = productApi.getProductById(4)
+                val user = mainApi.auth(
+                    AuthRequest(
+                        binding.etUsername.text.toString(),
+                        binding.etPassword.text.toString()
+                    )
+                )
                 runOnUiThread {
-                    binding.tvProduct.text = product.title
+                    //с помощью пикассо загружаем фото
+                    binding.apply {
+                        Picasso.get().load(user.image).into(imFotoHeader)
+                        tvFirstName.text = user.firstName
+                        tvLastName.text = user.lastName
+                    }
+
                 }
 
             }
